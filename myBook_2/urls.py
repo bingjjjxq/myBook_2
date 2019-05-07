@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url,include
 from django.contrib import admin
 
 from myBook_2.view import *
@@ -25,4 +25,5 @@ urlpatterns = [
 
     url(r'^$', index.as_view()),
     url(r'^index/$', index.as_view(), name='index'),
+    url(r'^managerbook/', include('managerbook.urls')),
 ]

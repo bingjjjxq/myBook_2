@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-__author__ = 'HeYang'
-__time__ = '2018/7/20 21:15'
+__author__ = 'Journey'
+__time__ = '2019/5/7 15:45'
 
 from django import forms
 # 定义组件和样式
@@ -10,6 +10,9 @@ from .models import TypeBook, Publisher, Author
 
 
 class BookForm(forms.Form):
+    """
+    图书添加表单
+    """
 
     name = forms.CharField(
         max_length=32,
@@ -65,3 +68,46 @@ class BookForm(forms.Form):
             attrs={"class": "selectpicker", "data-live-search": "true", "data-width": "100%", "id": "publisher", }
         )
     )
+
+
+class DetailsForm(forms.Form):
+    """
+    图书详情表单
+    """
+    chapter = forms.IntegerField(
+        widget=widgets.NumberInput(
+            attrs={"placeholder": "章节", "class": "form-control", 'id': 'chapter',}
+        )
+    )
+
+    pages = forms.IntegerField(
+        widget=widgets.NumberInput(
+            attrs={"placeholder": "页数", "class": "form-control", 'id': 'pages', }
+        )
+    )
+
+    words = forms.IntegerField(
+        widget=widgets.NumberInput(
+            attrs={"placeholder": "字数", "class": "form-control", 'id': 'words', }
+        )
+    )
+
+    contentinfo = forms.CharField(
+        widget=widgets.Textarea(
+            attrs={"rows": 8, "class": 'form-control', "id": "demo-textarea-input-1", 'placeholder': '内容简介'}
+        )
+    )
+
+    catalog = forms.CharField(
+        widget=widgets.Textarea(
+            attrs={"rows": 8, "class": 'form-control', "id": "demo-textarea-input-2", 'placeholder': '目录'}
+        )
+    )
+
+    logo = forms.ImageField(
+        required=False,
+        widget=widgets.FileInput(
+            attrs={"id": "logo_file", "class": 'fileinput-new btn btn-primary btn-file'}
+        )
+    )
+

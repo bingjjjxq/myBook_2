@@ -5,7 +5,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 
 from managerbook.models import *
-from managerbook.form import BookForm
+from managerbook.form import BookForm,DetailsForm
+from PIL import Image
 
 # from pure_pagination import Paginator
 
@@ -39,10 +40,11 @@ class Addbook(ListView):
 
     def get_context_data(self, **kwargs):
         book_form = BookForm()
+        details_form = DetailsForm()
         context = super(Addbook, self).get_context_data()
 
         context['book_form'] = book_form
-
+        context['details_form'] = details_form
         return context
 
     def post(self, request):
@@ -70,6 +72,7 @@ class Addbook(ListView):
             ret['data'] = book_form.errors
 
             return JsonResponse(ret)
+
 
 class index(ListView):
     """
@@ -163,3 +166,62 @@ class index(ListView):
 
         print(context)
         return context
+
+
+class Create_Details(View):
+    """
+    完善书籍详情页功能
+    """
+    def post(self, request):
+        ret = {'status': "", "data": ""}
+        details_form = DetailsForm(request.POST, request.FILES)
+
+        if details_form.is_valid():
+            details_data = details_form.cleaned_data
+            details = Details()
+            details.chapter = details_data['chapter']
+            details.contentinfo = details_data['contentinfo']
+            details.catalog = details_data['catalog']
+            details.words = details_data['words']
+            details.pages = details_data['pages']
+
+            # 保存图片
+            logo = details_data['logo']
+            location = 'media/images/logos/' + \
+                       str(details_data['words']) + str(details_data['pages']) + '_' + str(logo.name)
+            img = Image.open(logo)
+            img.save(location)
+
+            # 存储数据库路径
+            details.logo = location
+            details.save()
+
+            # 关联我们当前这本书的详细信息
+            book_obj = Book.objects.get(id=int(request.POST.get('book_id')))
+            book_obj.info = details
+            book_obj.save()
+
+            ret['status'] = 'success'
+            ret['data'] = '图书信息完善成功'
+
+            return JsonResponse(ret)
+        else:
+            ret['data'] = details_form.errors
+
+            return JsonResponse(ret)
+
+
+class Book_Del(View):
+    """
+    书籍删除功能
+    """
+    def post(self, request):
+        ret = {'status': "success", "data":"删除成功"}
+
+        book_id = request.POST.get('book_id')
+        book_id = int(book_id)
+
+        book_obj = Book.objects.get(id=book_id)
+        book_obj.delete()
+
+        return JsonResponse(ret)

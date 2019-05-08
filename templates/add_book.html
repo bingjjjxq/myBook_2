@@ -257,6 +257,7 @@
                                 <th>类别</th>
                                 <th class="text-center">出版状态</th>
                                 <th class="text-center">库存数量</th>
+                                <th class="text-center">操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -282,7 +283,131 @@
                                         </td>
                                     {% endif %}
                                     <td class="text-center">{{ book.stocks }}</td>
+                                    <td class="text-center">
+                                        {% if book.info %}
+                                            <button class="btn btn-purple btn-rounded" data-toggle="modal"
+                                                    data-target="#details" type="button" id="details_id"
+                                                    disabled="disabled"
+                                                    onclick="Values({{ book.id }})">详情已完善
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-info btn-rounded" data-toggle="modal"
+                                                    data-target="#details" type="button" id="details_id"
+                                                    onclick="Values({{ book.id }})">请完善详情
+                                            </button>
+                                        {% endif %}
+
+                                        <button class="btn btn-danger btn-rounded" data-toggle="modal"
+                                                data-target="#bookdel" type="button"
+                                                onclick="Values({{ book.id }})">删除
+                                        </button>
+
+                                        <a class="btn btn-warning btn-rounded"
+                                           href="">编辑</a>
+                                    </td>
                                 </tr>
+
+                                <div class="modal fade" id="bookdel" tabindex="-1" role="dialog"
+                                         aria-labelledby="myModalLabel">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close"><span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                    <h1 class="modal-title" id="myModalLabel">
+                                                        <h4>警告</h4>
+                                                    </h1>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h4 class="text-danger">是否删除?</h4>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                        关闭
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger" id="book_del">确认
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <div class="modal fade" id="details" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close"><span aria-hidden="true">&times;</span>
+                                                </button>
+                                                <h4 class="modal-title" id="myModalLabel">完善图书详情</h4>
+                                            </div>
+                                            <div class="modal-body">
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">章节</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.chapter }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">页数</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.pages }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">字数</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.words }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">内容简介</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.contentinfo }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">目录</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.catalog }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"
+                                                           for="demo-text-input">图书封面</label>
+                                                    <div class="col-md-9">
+                                                        {{ details_form.logo }}
+                                                    </div>
+                                                </div>
+
+                                                <input type="hidden" value="" id="book_id" name="book_id">
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                    关闭
+                                                </button>
+                                                <button type="button" class="btn btn-primary" id="create_details"
+                                                        value="">
+                                                    保存
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -358,13 +483,96 @@
                 data: input_dict,
                 traditional: true,
                 success: function (data) {
-                    console.log(data);
+                    if (data['status'] == "success") {
+                        window.location.reload();
+                        toastr.success(data['data']);
+                    } else {
+                        Data = data['data'];
+                        //  Data == {'price':  '必须要填写', 'stocks': '必须是一个数字'}
+                        console.log(Data);
+                        for (var key in Data) {
+                            console.log(key);
+                        }
+                        // for i in {'price': '1', 'stocks': '2'}:
+                        //       i = key
+                        // toastr.error('失败');
+                        toastr.warning(key + Data[key]);
+                    }
                 },
                 error: function (error) {
                     console.log(error);
                 }
             })
 
-        })
+        });
+
+        $("#create_details").click(function () {
+            var sendData = new FormData();
+            sendData.append("chapter", $("#chapter").val());
+            sendData.append("pages", $("#pages").val());
+            sendData.append("words", $("#words").val());
+            sendData.append("contentinfo", $("#contentinfo").val());
+            sendData.append("catalog", $("#catalog").val());
+            sendData.append("logo", $("#logo_file")[0].files[0]);
+            sendData.append("book_id", $("#book_id").val());
+
+            $.ajax({
+                async: false,
+                processData: false,
+                cache: false,
+                contentType: false,
+                type: "post",
+                dataType: "json",
+                url: "{% url 'create_details' %}",
+                data: sendData,
+                success: function (data) {
+                    if (data['status'] == "success") {
+                        window.location.reload();
+                        toastr.success(data['data']);
+                    } else {
+                        Data = data['data'];
+                        //  Data == {'price':  '必须要填写', 'stocks': '必须是一个数字'}
+                        console.log(Data);
+                        for (var key in Data) {
+                            console.log(key);
+                        }
+                        // for i in {'price': '1', 'stocks': '2'}:
+                        //       i = key
+                        // toastr.error('失败');
+                        toastr.warning(key + Data[key]);
+                    }
+                },
+                    error:function (error) {
+                        console.log(error);
+                    }
+                })
+
+
+        });
+
+        $("#book_del").click(function () {
+            var input_dict = {'book_id': ''};
+            input_dict['book_id'] = $("#book_id").val();
+
+            $.ajax({
+                type: 'post',
+                dataType: "json",
+                url: "{% url 'book_del' %}",
+                data: input_dict,
+                success: function (data) {
+                    if (data['status'] == "success") {
+                        window.location.reload();
+                        toastr.success(data['data']);
+                    }
+                },
+                error: function  (error) {
+                    console.log(error);
+                }
+            })
+        });
+
+        function Values(ID) {
+            $("#book_id").val(ID);
+        };
     </script>
 {% endblock %}
